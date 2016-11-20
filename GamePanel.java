@@ -6,6 +6,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.awt.Point;
+import java.awt.Color;
 
 public class GamePanel extends JPanel implements MouseListener, MouseMotionListener{
 	private static final int NODE_COUNT = 20;
@@ -28,16 +29,63 @@ public class GamePanel extends JPanel implements MouseListener, MouseMotionListe
 		// generate the nodes
 		this.node = new NodeWrapper[GamePanel.NODE_COUNT];
 		for(int i = 0; i < GamePanel.NODE_COUNT; ++i)
-			this.node[i] = new NodeWrapper(new Node((int)(Math.random() * (this.getWidth() - Node.SIZE)), (int)(Math.random() * (this.getHeight() - Node.SIZE))), null, null);
+			this.node[i] = new NodeWrapper(i, new Node((int)(Math.random() * (this.getWidth() - Node.SIZE)), (int)(Math.random() * (this.getHeight() - Node.SIZE))), null, null);
 		this.repaint();
+
+		// some adjacencies
+		for(int i = 0; i < GamePanel.NODE_COUNT; ++i){
+			for(int j = 0; j < GamePanel.NODE_COUNT; ++j){
+				this.node[i].addAdjacent(this.node[j]);
+				this.node[j].addAdjacent(this.node[i]);
+			}
+		}
 	}
 
+	private boolean checkPlanar(){
+		return false;
+	}
+
+	// draw the scene
+	// NOTE: all adjacencies are drawn first, then all nodes are drawn
+	// this is so line segments appear "underneath" the nodes
 	public void paintComponent(Graphics g){
 		super.paintComponent(g);
-		// draw the nodes
+
+		// set up the "mark" array for traversal
+		boolean[] mark = new boolean[GamePanel.NODE_COUNT];
+		for(int i = 0; i < GamePanel.NODE_COUNT; ++i)
+			mark[i] = false;
+
+		// traverse over each adjacency
 		for(int i = 0; i < GamePanel.NODE_COUNT; ++i){
 			Node n = this.node[i].getNode();
+
+			// for each node, iterate over its adjacency list
+			NodeWrapper current = this.node[i].getNext();
+			while(current != null){
+				// if already processed, skip it
+				if(mark[current.getID()] == true){
+					current = current.getNext();
+					continue;
+				}
+				Node cn = current.getNode();
+				g.drawLine(n.x + (Node.SIZE/2), n.y + (Node.SIZE/2), cn.x + (Node.SIZE/2), cn.y + (Node.SIZE/2));
+				current = current.getNext();
+
+				// mark this node
+				mark[i] = true;
+			}
+		}
+
+		// traverse over each node
+		for(int i = 0; i < GamePanel.NODE_COUNT; ++i){
+			Node n = this.node[i].getNode();
+
+			// draw the node
+			g.setColor(new Color(0.6f, 0.0f, 0.6f));
 			g.fillOval(n.x, n.y, Node.SIZE, Node.SIZE);
+			g.setColor(new Color(0.0f,0.0f,0.0f));
+			g.drawString(i + "", n.x, n.y);
 		}
 	}
 
@@ -53,6 +101,10 @@ public class GamePanel extends JPanel implements MouseListener, MouseMotionListe
 
 	public void mouseReleased(MouseEvent e){
 		this.mouseFocus = null;
+		if(this.checkPlanar()){ // win condition
+			JOptionPane.showMessageDialog(this, "Congratulations! You Win!");
+			this.reset();
+		}
 	}
 
 	public void mousePressed(MouseEvent e){
