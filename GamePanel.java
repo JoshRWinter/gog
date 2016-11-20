@@ -33,13 +33,13 @@ public class GamePanel extends JPanel implements MouseListener, MouseMotionListe
 		this.repaint();
 
 		// some adjacencies
-		for(int i = 0; i < GamePanel.NODE_COUNT; ++i){
+		/*for(int i = 0; i < GamePanel.NODE_COUNT; ++i){
 			for(int j = 0; j < GamePanel.NODE_COUNT; ++j){
 				this.node[i].addAdjacent(this.node[j]);
 				this.node[j].addAdjacent(this.node[i]);
 			}
-		}
-		/*this.node[6].addAdjacent(this.node[14]);
+		}*/
+		this.node[6].addAdjacent(this.node[14]);
 		this.node[14].addAdjacent(this.node[6]);
 
 		this.node[14].addAdjacent(this.node[13]);
@@ -50,9 +50,6 @@ public class GamePanel extends JPanel implements MouseListener, MouseMotionListe
 
 		this.node[19].addAdjacent(this.node[0]);
 		this.node[0].addAdjacent(this.node[19]);
-
-		this.node[1].addAdjacent(this.node[1]);
-		this.node[1].addAdjacent(this.node[1]);*/
 
 		// a simple test
 		AdjacencyIterator ai = new AdjacencyIterator(this.node);
@@ -66,7 +63,54 @@ public class GamePanel extends JPanel implements MouseListener, MouseMotionListe
 	}
 
 	private boolean checkPlanar(){
-		return false;
+		AdjacencyIterator ai = new AdjacencyIterator(this.node);
+		Adjacency a = ai.nextAdjacency();
+		while(a != null){
+			AdjacencyIterator ai2 = new AdjacencyIterator(this.node);
+			Adjacency b = ai2.nextAdjacency();
+			while(b != null){
+				// if same adjacency, skip
+				if(a.equals(b)){
+					b = ai2.nextAdjacency();
+					continue;
+				}
+
+				// if 2 adjacencies have a node in common, skip
+				if(Adjacency.nodeInCommon(a, b)){
+					b = ai2.nextAdjacency();
+					continue;
+				}
+
+				// check if intersecting
+				if(GamePanel.checkIntersecting(a, b)){
+					return false;
+				}
+
+				b = ai2.nextAdjacency();
+			}
+			a = ai.nextAdjacency();
+		}
+		return true;
+	}
+
+	private static boolean checkIntersecting(Adjacency a, Adjacency b){
+		Node a1 = a.from.getNode();
+		Node a2 = a.to.getNode();
+		Node b1 = b.from.getNode();
+		Node b2 = b.to.getNode();
+
+		// first adjacency
+		Point p1 = new Point(a1.x + (Node.SIZE/2), a1.y + (Node.SIZE/2));
+		Point p2 = new Point(a2.x + (Node.SIZE/2), a2.y + (Node.SIZE/2));
+		// second adjacency
+		Point p3 = new Point(b1.x + (Node.SIZE/2), b1.y + (Node.SIZE/2));
+		Point p4 = new Point(b2.x + (Node.SIZE/2), b2.y + (Node.SIZE/2));
+
+    	boolean p1side = (p4.x - p3.x) * (p1.y - p3.y) - (p4.y - p3.y) * (p1.x - p3.x) > 0;
+    	boolean p2side = (p4.x - p3.x) * (p2.y - p3.y) - (p4.y - p3.y) * (p2.x - p3.x) > 0;
+    	boolean p3side = (p2.x - p1.x) * (p3.y - p1.y) - (p2.y - p1.y) * (p3.x - p1.x) > 0;
+    	boolean p4side = (p2.x - p1.x) * (p4.y - p1.y) - (p2.y - p1.y) * (p4.x - p1.x) > 0;
+    	return p1side != p2side && p3side != p4side;
 	}
 
 	// draw the scene
@@ -74,6 +118,8 @@ public class GamePanel extends JPanel implements MouseListener, MouseMotionListe
 	// this is so line segments appear "underneath" the nodes
 	public void paintComponent(Graphics g){
 		super.paintComponent(g);
+
+		g.drawString(this.checkPlanar()?"planar":"not planar",10, 10);
 
 		// set up the "mark" array for traversal
 		boolean[] mark = new boolean[GamePanel.NODE_COUNT];
@@ -119,7 +165,7 @@ public class GamePanel extends JPanel implements MouseListener, MouseMotionListe
 
 	public void mouseReleased(MouseEvent e){
 		this.mouseFocus = null;
-		if(this.checkPlanar()){ // win condition
+		if(this.checkPlanar() && false){ // win condition
 			JOptionPane.showMessageDialog(this, "Congratulations! You Win!");
 			this.reset();
 		}
