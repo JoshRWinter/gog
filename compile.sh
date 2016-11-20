@@ -1,6 +1,6 @@
 #!/bin/bash
 
-javac *.java # javac should compile all other files automatically
+javac *.java
 
 if [ $? -eq 1 ]; then
 	exit
