@@ -39,6 +39,30 @@ public class GamePanel extends JPanel implements MouseListener, MouseMotionListe
 				this.node[j].addAdjacent(this.node[i]);
 			}
 		}
+		/*this.node[6].addAdjacent(this.node[14]);
+		this.node[14].addAdjacent(this.node[6]);
+
+		this.node[14].addAdjacent(this.node[13]);
+		this.node[13].addAdjacent(this.node[14]);
+
+		this.node[3].addAdjacent(this.node[11]);
+		this.node[11].addAdjacent(this.node[3]);
+
+		this.node[19].addAdjacent(this.node[0]);
+		this.node[0].addAdjacent(this.node[19]);
+
+		this.node[1].addAdjacent(this.node[1]);
+		this.node[1].addAdjacent(this.node[1]);*/
+
+		// a simple test
+		AdjacencyIterator ai = new AdjacencyIterator(this.node);
+		Adjacency a = null;
+		int count = 0;
+		do{
+			a = ai.nextAdjacency();
+			if(a != null) ++count;
+		}while(a != null);
+		System.err.println("count=" + count);
 	}
 
 	private boolean checkPlanar(){
@@ -61,19 +85,13 @@ public class GamePanel extends JPanel implements MouseListener, MouseMotionListe
 			Node n = this.node[i].getNode();
 
 			// for each node, iterate over its adjacency list
-			NodeWrapper current = this.node[i].getNext();
-			while(current != null){
-				// if already processed, skip it
-				if(mark[current.getID()] == true){
-					current = current.getNext();
-					continue;
-				}
-				Node cn = current.getNode();
-				g.drawLine(n.x + (Node.SIZE/2), n.y + (Node.SIZE/2), cn.x + (Node.SIZE/2), cn.y + (Node.SIZE/2));
-				current = current.getNext();
-
-				// mark this node
-				mark[i] = true;
+			AdjacencyIterator ai = new AdjacencyIterator(this.node);
+			Adjacency a = ai.nextAdjacency();
+			while(a != null){
+				Node to = a.to.getNode();
+				Node from = a.from.getNode();
+				g.drawLine(from.x + (Node.SIZE/2), from.y + (Node.SIZE/2), to.x + (Node.SIZE/2), to.y + (Node.SIZE/2));
+				a = ai.nextAdjacency();
 			}
 		}
 

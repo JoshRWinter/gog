@@ -20,6 +20,14 @@ public class NodeWrapper{
 			return;
 		}
 
+		// cant add yourself as an adjacency
+		if(this == nodeWrapper)
+			return;
+
+		// cant add duplicate adjacencies
+		if(this.isAdjacent(nodeWrapper))
+			return;
+
 		// first add the node to the current list head,
 		NodeWrapper nw = new NodeWrapper(nodeWrapper.getID(), n, next, this);
 		this.next = nw;
