@@ -12,6 +12,6 @@ public class Adjacency{
 	}
 
 	public static boolean nodeInCommon(Adjacency a, Adjacency b){
-		return a.from == b.from || a.from == b.to || a.to == b.from ||a.to == b.to;
+		return a.from.getNode() == b.from.getNode() || a.from.getNode() == b.to.getNode() || a.to.getNode() == b.from.getNode() || a.to.getNode() == b.to.getNode();
 	}
 }
