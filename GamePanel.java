@@ -1,4 +1,5 @@
 import javax.swing.JPanel;
+import javax.swing.JLabel;
 import java.awt.BorderLayout;
 import java.awt.Graphics;
 import javax.swing.JOptionPane;
@@ -7,28 +8,53 @@ import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.awt.Point;
 import java.awt.Color;
+import java.awt.event.ActionListener;
+import java.awt.event.ActionEvent;
 import java.util.Random;
+import javax.swing.Timer;
 
-public class GamePanel extends JPanel implements MouseListener, MouseMotionListener{
+public class GamePanel extends JPanel implements MouseListener, MouseMotionListener, ActionListener{
 	public static final int NODE_COUNT = 20;
 	private Main owner;
+	private JLabel timerLabel;
 	private NodeWrapper[] node;
 	private Node mouseFocus;
 	private int mouseOffsetX;
 	private int mouseOffsetY;
+	private Timer timer;
+	private int elapsed;
 	private boolean allset; // a semaphore of sorts, dont allow painting if false
+	private boolean mouseLock; // is the mouse allowed to move the nodes?
 
-	public GamePanel(Main owner){
+	public GamePanel(Main owner, JLabel timerLabel){
 		super(new BorderLayout());
 		this.owner = owner;
+		this.timerLabel = timerLabel;
 		this.addMouseListener(this);
 		this.addMouseMotionListener(this);
 		this.allset(true, false);
+		this.timer = new Timer(1000, this);
+	}
+
+	// called by the timer object
+	public void actionPerformed(ActionEvent e){
+		++elapsed;
+		int minutes = 0;
+		int seconds = elapsed;
+		while(seconds > 59){
+			seconds -= 60;
+			++minutes;
+		}
+		this.timerLabel.setText(String.format("%02d:%02d",minutes, seconds));
 	}
 
 	public synchronized void reset(){
 		this.allset(true, false);
 		this.mouseFocus = null;
+		this.mouseLock = false;
+		this.timer.stop();
+		this.elapsed = 0;
+		this.timerLabel.setText("00:00");
 
 		// generate the nodes
 		this.node = new NodeWrapper[GamePanel.NODE_COUNT];
@@ -82,16 +108,15 @@ public class GamePanel extends JPanel implements MouseListener, MouseMotionListe
 		this.repaint();
 
 		// a simple test
-		AdjacencyIterator ai = new AdjacencyIterator(this.node);
+		/*AdjacencyIterator ai = new AdjacencyIterator(this.node);
 		Adjacency a = null;
 		int count = 0;
 		do{
 			a = ai.nextAdjacency();
 			if(a != null) ++count;
 		}while(a != null);
-		System.err.println("adjacencies=" + count);
-
-		//JOptionPane.showMessageDialog(this, "Welcome to game ");
+		this.adjacencyCount = count;
+		System.out.println(count + " adjacencies");*/
 	}
 
 	// full shuffle, jumble up the nodes
@@ -199,14 +224,32 @@ public class GamePanel extends JPanel implements MouseListener, MouseMotionListe
 	}
 
 	public void mouseReleased(MouseEvent e){
+		if(this.mouseLock)
+			return;
 		this.mouseFocus = null;
 		if(this.checkPlanar()){ // win condition
-			JOptionPane.showMessageDialog(this, "Congratulations! You Win!");
-			this.reset();
+			this.timer.stop();
+			long seconds = elapsed;
+			long minutes = 0;
+			while(seconds > 59){
+				seconds -= 60;
+				++minutes;
+			}
+			this.mouseLock = true;
+
+			JOptionPane.showMessageDialog(this, 
+				"Congratulations! You Win!\n\n" +
+				"You corrected the graph in " + String.format("%02d:%02d", minutes, seconds)
+				);
 		}
 	}
 
 	public void mousePressed(MouseEvent e){
+		if(this.mouseLock)
+			return;
+		if(!this.timer.isRunning())
+			this.timer.start();
+
 		Point p = e.getPoint();
 		for(int i = 0; i < GamePanel.NODE_COUNT; ++i){
 			Node n = this.node[i].getNode();
