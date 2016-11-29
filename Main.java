@@ -69,6 +69,8 @@ public class Main extends JFrame implements ActionListener{
 			}catch(Exception ex){
 				return;
 			}
+			if(count < 2)
+				return;
 			this.gamePanel.nodeCount = count;
 			this.gamePanel.reset();
 		}
