@@ -21,17 +21,36 @@ public class NodeWrapper{
 		}
 
 		// cant add yourself as an adjacency
-		if(this == nodeWrapper)
+		if(this.node == nodeWrapper.node)
 			return;
 
 		// cant add duplicate adjacencies
 		if(this.isAdjacent(nodeWrapper))
 			return;
 
-		// first add the node to the current list head,
+		// add the node to the current list head,
 		NodeWrapper nw = new NodeWrapper(nodeWrapper.getID(), n, next, this);
+		if(this.next != null)
+			this.next.prev = nw;
 		this.next = nw;
 	}
+
+	public void removeAdjacent(NodeWrapper nodeWrapper){
+		if(this.prev != null){
+			System.err.println(this.toString() + " is not the list head");
+			return;
+		}
+
+		NodeWrapper current = this.next;
+		while(current != null){
+			if(current.node == nodeWrapper.node){
+				current.remove();
+				return;
+			}
+			current = current.getNext();
+		}
+	}
+
 
 	public boolean isAdjacent(NodeWrapper n){
 		// if <this> isn't the list head, it doesn't make much sense to call this function
@@ -50,6 +69,17 @@ public class NodeWrapper{
 		return false;
 	}
 
+	// retrieve the number of nodes adjacent to this one
+	public int adjacencyCount(){
+		int count = 0;
+		NodeWrapper current = this.getNext();
+		while(current != null){
+			++count;
+			current = current.getNext();
+		}
+		return count;
+	}
+
 	public int getID(){
 		return this.id;
 	}
@@ -63,8 +93,12 @@ public class NodeWrapper{
 	}
 
 	public void remove(){
-		if(this.prev != null)
-			this.prev.next = this.next;
+		if(this.prev == null){
+			System.err.println("can't remove list head!");
+			return;
+		}
+		
+		this.prev.next = this.next;
 		
 		if(this.next != null)
 			this.next.prev = this.prev;

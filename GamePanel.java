@@ -7,49 +7,79 @@ import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.awt.Point;
 import java.awt.Color;
+import java.util.Random;
 
 public class GamePanel extends JPanel implements MouseListener, MouseMotionListener{
-	private static final int NODE_COUNT = 20;
+	public static final int NODE_COUNT = 20;
 	private Main owner;
 	private NodeWrapper[] node;
 	private Node mouseFocus;
 	private int mouseOffsetX;
 	private int mouseOffsetY;
+	private boolean allset; // a semaphore of sorts, dont allow painting if false
 
 	public GamePanel(Main owner){
 		super(new BorderLayout());
 		this.owner = owner;
 		this.addMouseListener(this);
 		this.addMouseMotionListener(this);
+		this.allset(true, false);
 	}
 
-	public void reset(){
+	public synchronized void reset(){
+		this.allset(true, false);
 		this.mouseFocus = null;
 
 		// generate the nodes
 		this.node = new NodeWrapper[GamePanel.NODE_COUNT];
-		for(int i = 0; i < GamePanel.NODE_COUNT; ++i)
-			this.node[i] = new NodeWrapper(i, new Node((int)(Math.random() * (this.getWidth() - Node.SIZE)), (int)(Math.random() * (this.getHeight() - Node.SIZE))), null, null);
-		this.repaint();
-
-		// some adjacencies
-		/*for(int i = 0; i < GamePanel.NODE_COUNT; ++i){
+		int xoff = 0;
+		int yoff = 30;
+		// arrange <GamePanel.NODE_COUNT> nodes into a straight line
+		for(int i = 0; i < GamePanel.NODE_COUNT; ++i){
+			this.node[i] = new NodeWrapper(i, new Node(xoff, yoff), null, null);
+			xoff += Node.SIZE;
+			if(xoff + Node.SIZE > this.getWidth()){
+				yoff += Node.SIZE;
+				xoff = 0;
+			}
+		}
+		// add initial adjacencies
+		for(int i = 0; i < GamePanel.NODE_COUNT - 1; ++i){
+			this.node[i].addAdjacent(this.node[i + 1]);
+			this.node[i + 1].addAdjacent(this.node[i]);
+		}
+		this.shuffleY();
+		// add some more adjacencies
+		Random r = new Random();
+		for(int i = 0; i < GamePanel.NODE_COUNT; ++i){
 			for(int j = 0; j < GamePanel.NODE_COUNT; ++j){
+				if(i == j)
+					continue;
+				// random chance to skip this <j> node
+				if(r.nextInt(3) != 0)
+					continue;
+
+				// make an adjacency between <i> and <j>, if the
+				// new adjacency compromises the "planarity" of
+				// the graph, then remove it and loop again.
+				if(this.node[i].isAdjacent(this.node[j]))
+					continue;
 				this.node[i].addAdjacent(this.node[j]);
 				this.node[j].addAdjacent(this.node[i]);
+				if(!this.checkPlanar()){
+					// remove it
+					this.node[i].removeAdjacent(this.node[j]);
+					this.node[j].removeAdjacent(this.node[i]);
+				}
 			}
-		}*/
-		this.node[6].addAdjacent(this.node[14]);
-		this.node[14].addAdjacent(this.node[6]);
+		}
 
-		this.node[14].addAdjacent(this.node[13]);
-		this.node[13].addAdjacent(this.node[14]);
+		// jumble 'em up
+		this.shuffle();
 
-		this.node[3].addAdjacent(this.node[11]);
-		this.node[11].addAdjacent(this.node[3]);
-
-		this.node[19].addAdjacent(this.node[0]);
-		this.node[0].addAdjacent(this.node[19]);
+		this.allset(true,true);
+		// refresh the screen
+		this.repaint();
 
 		// a simple test
 		AdjacencyIterator ai = new AdjacencyIterator(this.node);
@@ -59,7 +89,24 @@ public class GamePanel extends JPanel implements MouseListener, MouseMotionListe
 			a = ai.nextAdjacency();
 			if(a != null) ++count;
 		}while(a != null);
-		System.err.println("count=" + count);
+		System.err.println("adjacencies=" + count);
+
+		//JOptionPane.showMessageDialog(this, "Welcome to game ");
+	}
+
+	// full shuffle, jumble up the nodes
+	private void shuffle(){
+		for(int i = 0; i < GamePanel.NODE_COUNT; ++i){
+			this.node[i].getNode().x = (int)(Math.random() * (this.getWidth() - Node.SIZE));
+			this.node[i].getNode().y = (int)(Math.random() * (this.getHeight() - Node.SIZE));
+		}
+	}
+
+	// jumble up only on the y axis
+	private void shuffleY(){
+		for(int i = 0; i < GamePanel.NODE_COUNT; ++i){
+			this.node[i].getNode().y = (int)(Math.random() * (this.getHeight() - Node.SIZE));
+		}
 	}
 
 	private boolean checkPlanar(){
@@ -118,27 +165,17 @@ public class GamePanel extends JPanel implements MouseListener, MouseMotionListe
 	// this is so line segments appear "underneath" the nodes
 	public void paintComponent(Graphics g){
 		super.paintComponent(g);
+		if(!this.allset(false,false))
+			return;
 
-		g.drawString(this.checkPlanar()?"planar":"not planar",10, 10);
-
-		// set up the "mark" array for traversal
-		boolean[] mark = new boolean[GamePanel.NODE_COUNT];
-		for(int i = 0; i < GamePanel.NODE_COUNT; ++i)
-			mark[i] = false;
-
-		// traverse over each adjacency
-		for(int i = 0; i < GamePanel.NODE_COUNT; ++i){
-			Node n = this.node[i].getNode();
-
-			// for each node, iterate over its adjacency list
-			AdjacencyIterator ai = new AdjacencyIterator(this.node);
-			Adjacency a = ai.nextAdjacency();
-			while(a != null){
-				Node to = a.to.getNode();
-				Node from = a.from.getNode();
-				g.drawLine(from.x + (Node.SIZE/2), from.y + (Node.SIZE/2), to.x + (Node.SIZE/2), to.y + (Node.SIZE/2));
-				a = ai.nextAdjacency();
-			}
+		// iterate over all adjacencies
+		AdjacencyIterator ai = new AdjacencyIterator(this.node);
+		Adjacency a = ai.nextAdjacency();
+		while(a != null){
+			Node to = a.to.getNode();
+			Node from = a.from.getNode();
+			g.drawLine(from.x + (Node.SIZE/2), from.y + (Node.SIZE/2), to.x + (Node.SIZE/2), to.y + (Node.SIZE/2));
+			a = ai.nextAdjacency();
 		}
 
 		// traverse over each node
@@ -148,8 +185,6 @@ public class GamePanel extends JPanel implements MouseListener, MouseMotionListe
 			// draw the node
 			g.setColor(new Color(0.6f, 0.0f, 0.6f));
 			g.fillOval(n.x, n.y, Node.SIZE, Node.SIZE);
-			g.setColor(new Color(0.0f,0.0f,0.0f));
-			g.drawString(i + "", n.x, n.y);
 		}
 	}
 
@@ -165,7 +200,7 @@ public class GamePanel extends JPanel implements MouseListener, MouseMotionListe
 
 	public void mouseReleased(MouseEvent e){
 		this.mouseFocus = null;
-		if(this.checkPlanar() && false){ // win condition
+		if(this.checkPlanar()){ // win condition
 			JOptionPane.showMessageDialog(this, "Congratulations! You Win!");
 			this.reset();
 		}
@@ -209,4 +244,13 @@ public class GamePanel extends JPanel implements MouseListener, MouseMotionListe
 	public void mouseMoved(MouseEvent e){
 	}
 
+	private synchronized boolean allset(boolean set, boolean v){
+		if(set){
+			this.allset = v;
+			return v;
+		}
+		else{
+			return this.allset;
+		}
+	}
 }

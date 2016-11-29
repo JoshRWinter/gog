@@ -14,11 +14,10 @@ public class Main extends JFrame implements ActionListener{
 	private JButton resetButton;
 
 	public Main(){
-		setSize(850,600);
+		setSize(900,650);
 		setLocationRelativeTo(null);
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
 		setTitle("Game of Graphs by Josh Winter");
-		setResizable(false);
 
 		this.gamePanel = new GamePanel(this);
 		this.topbar = new JPanel(new BorderLayout());
@@ -33,13 +32,20 @@ public class Main extends JFrame implements ActionListener{
 		this.add(this.gamePanel, BorderLayout.CENTER);
 
 		setVisible(true);
-		//JOptionPane.showMessageDialog(null, "width=" + this.gamePanel.getWidth() + ", height=" + this.gamePanel.getHeight());
 
 		this.gamePanel.reset();
 	}
 
 	public static void main(String[] args){
-		new Main();
+		JFrame jf = new Main();
+		JOptionPane.showMessageDialog(jf,
+			"Welcome to Game of Graphs by Josh Winter!\n\n" +
+			"You are shown here a connected, planar graph of " + GamePanel.NODE_COUNT + " vertices.\n" +
+			"The graph is not represented in a true planar fashion, with\n" +
+			"line segments intersecting everywhere. Your job is to drag the\n" +
+			"nodes around using your mouse until the graph is represented in\n" +
+			"a true planar fashion (no line segment intersections)."
+			);
 	}
 
 	public void actionPerformed(ActionEvent e){
