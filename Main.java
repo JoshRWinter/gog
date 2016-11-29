@@ -52,7 +52,9 @@ public class Main extends JFrame implements ActionListener{
 			"- The graph is not represented in a true planar fashion, with line\n" +
 			"segments intersecting everywhere.\n\n" +
 			"- Your job is to drag the nodes around using your mouse until the graph\n" +
-			"is represented in a true planar fashion (no line segment intersections)."
+			"is represented in a true planar fashion (no line segment intersections).\n\n" +
+			"- Press the \"Node Count\" button to change the number of generated\n" +
+			"nodes."
 			);
 	}
 
@@ -60,7 +62,7 @@ public class Main extends JFrame implements ActionListener{
 		if(e.getSource() == this.resetButton)
 			this.gamePanel.reset();
 		else{
-			String nodeCount = JOptionPane.showInputDialog("How many nodes?");
+			String nodeCount = JOptionPane.showInputDialog("How many nodes do you want?");
 			int count;
 			try{
 				count = Integer.parseInt(nodeCount);
