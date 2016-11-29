@@ -17,12 +17,12 @@ public class GamePanel extends JPanel implements MouseListener, MouseMotionListe
 	public static final int NODE_COUNT = 20;
 	private Main owner;
 	private JLabel timerLabel;
-	private NodeWrapper[] node;
-	private Node mouseFocus;
+	private NodeWrapper[] node; // array of list heads
+	private Node mouseFocus; // the node the mouse is dragging
 	private int mouseOffsetX;
 	private int mouseOffsetY;
 	private Timer timer;
-	private int elapsed;
+	private int elapsed; // elapsed seconds
 	private boolean allset; // a semaphore of sorts, dont allow painting if false
 	private boolean mouseLock; // is the mouse allowed to move the nodes?
 
