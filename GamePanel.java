@@ -239,7 +239,8 @@ public class GamePanel extends JPanel implements MouseListener, MouseMotionListe
 
 			JOptionPane.showMessageDialog(this, 
 				"Congratulations! You Win!\n\n" +
-				"You corrected the graph in " + String.format("%02d:%02d", minutes, seconds)
+				"You corrected the graph in " + String.format("%02d:%02d\n", minutes, seconds) +
+				"Press the RESET button in the top right to play again."
 				);
 		}
 	}

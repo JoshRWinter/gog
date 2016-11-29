@@ -25,7 +25,7 @@ public class Main extends JFrame implements ActionListener{
 		this.topbar = new JPanel(new BorderLayout());
 
 		this.welcomeLabel = new JLabel("Welcome to Game of Graphs by Josh Winter");
-		this.resetButton = new JButton("Reset");
+		this.resetButton = new JButton("RESET");
 		this.resetButton.addActionListener(this);
 
 		this.topbar.add(this.welcomeLabel, BorderLayout.WEST);
