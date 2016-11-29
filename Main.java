@@ -13,6 +13,7 @@ public class Main extends JFrame implements ActionListener{
 	private JLabel welcomeLabel;
 	private JButton resetButton;
 	private JLabel timerLabel;
+	private JButton nodeButton;
 
 	public Main(){
 		setSize(1150,750);
@@ -24,12 +25,16 @@ public class Main extends JFrame implements ActionListener{
 		this.gamePanel = new GamePanel(this, this.timerLabel);
 		this.topbar = new JPanel(new BorderLayout());
 
-		this.welcomeLabel = new JLabel("Welcome to Game of Graphs by Josh Winter");
+
+		this.welcomeLabel = new JLabel(" Welcome to Game of Graphs by Josh Winter");
 		this.resetButton = new JButton("RESET");
 		this.resetButton.addActionListener(this);
+		this.nodeButton = new JButton("Node Count");
+		this.nodeButton.addActionListener(this);
 
-		this.topbar.add(this.welcomeLabel, BorderLayout.WEST);
+		this.topbar.add(this.welcomeLabel, BorderLayout.CENTER);
 		this.topbar.add(this.resetButton, BorderLayout.EAST);
+		this.topbar.add(this.nodeButton, BorderLayout.WEST);
 		this.add(this.topbar,BorderLayout.NORTH);
 		this.add(this.gamePanel, BorderLayout.CENTER);
 		this.add(this.timerLabel, BorderLayout.SOUTH);
@@ -43,7 +48,7 @@ public class Main extends JFrame implements ActionListener{
 		JFrame jf = new Main();
 		JOptionPane.showMessageDialog(jf,
 			"Welcome to Game of Graphs by Josh Winter!\n\n" +
-			"- You are shown here a connected, planar graph of " + GamePanel.NODE_COUNT + " vertices.\n\n" +
+			"- You are shown here a connected, planar graph of " + GamePanel.DEFAULT_NODE_COUNT + " vertices.\n\n" +
 			"- The graph is not represented in a true planar fashion, with line\n" +
 			"segments intersecting everywhere.\n\n" +
 			"- Your job is to drag the nodes around using your mouse until the graph\n" +
@@ -52,6 +57,18 @@ public class Main extends JFrame implements ActionListener{
 	}
 
 	public void actionPerformed(ActionEvent e){
-		this.gamePanel.reset();
+		if(e.getSource() == this.resetButton)
+			this.gamePanel.reset();
+		else{
+			String nodeCount = JOptionPane.showInputDialog("How many nodes?");
+			int count;
+			try{
+				count = Integer.parseInt(nodeCount);
+			}catch(Exception ex){
+				return;
+			}
+			this.gamePanel.nodeCount = count;
+			this.gamePanel.reset();
+		}
 	}
 }

@@ -14,7 +14,8 @@ import java.util.Random;
 import javax.swing.Timer;
 
 public class GamePanel extends JPanel implements MouseListener, MouseMotionListener, ActionListener{
-	public static final int NODE_COUNT = 20;
+	public static final int DEFAULT_NODE_COUNT = 20;
+	public int nodeCount;
 	private Main owner;
 	private JLabel timerLabel;
 	private NodeWrapper[] node; // array of list heads
@@ -34,6 +35,7 @@ public class GamePanel extends JPanel implements MouseListener, MouseMotionListe
 		this.addMouseMotionListener(this);
 		this.allset(true, false);
 		this.timer = new Timer(1000, this);
+		this.nodeCount = GamePanel.DEFAULT_NODE_COUNT;
 	}
 
 	// called by the timer object
@@ -57,11 +59,11 @@ public class GamePanel extends JPanel implements MouseListener, MouseMotionListe
 		this.timerLabel.setText("00:00");
 
 		// generate the nodes
-		this.node = new NodeWrapper[GamePanel.NODE_COUNT];
+		this.node = new NodeWrapper[this.nodeCount];
 		int xoff = 0;
 		int yoff = 30;
 		// arrange <GamePanel.NODE_COUNT> nodes into a straight line
-		for(int i = 0; i < GamePanel.NODE_COUNT; ++i){
+		for(int i = 0; i < this.nodeCount; ++i){
 			this.node[i] = new NodeWrapper(i, new Node(xoff, yoff), null, null);
 			xoff += Node.SIZE;
 			if(xoff + Node.SIZE > this.getWidth()){
@@ -70,15 +72,15 @@ public class GamePanel extends JPanel implements MouseListener, MouseMotionListe
 			}
 		}
 		// add initial adjacencies
-		for(int i = 0; i < GamePanel.NODE_COUNT - 1; ++i){
+		for(int i = 0; i < this.nodeCount - 1; ++i){
 			this.node[i].addAdjacent(this.node[i + 1]);
 			this.node[i + 1].addAdjacent(this.node[i]);
 		}
 		this.shuffleY();
 		// add some more adjacencies
 		Random r = new Random();
-		for(int i = 0; i < GamePanel.NODE_COUNT; ++i){
-			for(int j = 0; j < GamePanel.NODE_COUNT; ++j){
+		for(int i = 0; i < this.nodeCount; ++i){
+			for(int j = 0; j < this.nodeCount; ++j){
 				if(i == j)
 					continue;
 				// random chance to skip this <j> node
@@ -121,7 +123,7 @@ public class GamePanel extends JPanel implements MouseListener, MouseMotionListe
 
 	// full shuffle, jumble up the nodes
 	private void shuffle(){
-		for(int i = 0; i < GamePanel.NODE_COUNT; ++i){
+		for(int i = 0; i < this.nodeCount; ++i){
 			this.node[i].getNode().x = (int)(Math.random() * (this.getWidth() - Node.SIZE));
 			this.node[i].getNode().y = (int)(Math.random() * (this.getHeight() - Node.SIZE));
 		}
@@ -129,7 +131,7 @@ public class GamePanel extends JPanel implements MouseListener, MouseMotionListe
 
 	// jumble up only on the y axis
 	private void shuffleY(){
-		for(int i = 0; i < GamePanel.NODE_COUNT; ++i){
+		for(int i = 0; i < this.nodeCount; ++i){
 			this.node[i].getNode().y = (int)(Math.random() * (this.getHeight() - Node.SIZE));
 		}
 	}
@@ -204,7 +206,7 @@ public class GamePanel extends JPanel implements MouseListener, MouseMotionListe
 		}
 
 		// traverse over each node
-		for(int i = 0; i < GamePanel.NODE_COUNT; ++i){
+		for(int i = 0; i < this.nodeCount; ++i){
 			Node n = this.node[i].getNode();
 
 			// draw the node
@@ -252,7 +254,7 @@ public class GamePanel extends JPanel implements MouseListener, MouseMotionListe
 			this.timer.start();
 
 		Point p = e.getPoint();
-		for(int i = 0; i < GamePanel.NODE_COUNT; ++i){
+		for(int i = 0; i < this.nodeCount; ++i){
 			Node n = this.node[i].getNode();
 			if(p.x > n.x && p.x < n.x + Node.SIZE && p.y > n.y && p.y < n.y + Node.SIZE){
 				this.mouseFocus = n;
