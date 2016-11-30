@@ -15,14 +15,14 @@ public class Main extends JFrame implements ActionListener{
 	private JLabel timerLabel;
 	private JButton nodeButton;
 
-	public Main(){
+	public Main(int seed){
 		setSize(1150,750);
 		setLocationRelativeTo(null);
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
 		setTitle("Game of Graphs by Josh Winter");
 
 		this.timerLabel = new JLabel("00:00");
-		this.gamePanel = new GamePanel(this, this.timerLabel);
+		this.gamePanel = new GamePanel(this, this.timerLabel, seed);
 		this.topbar = new JPanel(new BorderLayout());
 
 
@@ -45,7 +45,18 @@ public class Main extends JFrame implements ActionListener{
 	}
 
 	public static void main(String[] args){
-		JFrame jf = new Main();
+		int seed = -1;
+		if(args.length > 0 && args[0].contains("seed=")){
+			try{
+				seed = Integer.parseInt(args[0].substring(5));
+			}catch(Exception e){
+				System.err.println("Error: could not parse \"" + args[0].substring(5) + "\" as an integer.");
+				return;
+			}
+		}
+
+		JFrame jf = new Main(seed);
+
 		JOptionPane.showMessageDialog(jf,
 			"Welcome to Game of Graphs by Josh Winter!\n\n" +
 			"- You are shown here a connected, planar graph of " + GamePanel.DEFAULT_NODE_COUNT + " vertices.\n\n" +

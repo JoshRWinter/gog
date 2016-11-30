@@ -26,8 +26,9 @@ public class GamePanel extends JPanel implements MouseListener, MouseMotionListe
 	private int elapsed; // elapsed seconds
 	private boolean allset; // a semaphore of sorts, dont allow painting if false
 	private boolean mouseLock; // is the mouse allowed to move the nodes?
+	Random rand;
 
-	public GamePanel(Main owner, JLabel timerLabel){
+	public GamePanel(Main owner, JLabel timerLabel, int seed){
 		super(new BorderLayout());
 		this.owner = owner;
 		this.timerLabel = timerLabel;
@@ -36,6 +37,10 @@ public class GamePanel extends JPanel implements MouseListener, MouseMotionListe
 		this.allset(true, false);
 		this.timer = new Timer(1000, this);
 		this.nodeCount = GamePanel.DEFAULT_NODE_COUNT;
+		if(seed == -1)
+			rand = new Random();
+		else
+			rand = new Random(seed);
 	}
 
 	// called by the timer object
@@ -78,13 +83,12 @@ public class GamePanel extends JPanel implements MouseListener, MouseMotionListe
 		}
 		this.shuffleY();
 		// add some more adjacencies
-		Random r = new Random();
 		for(int i = 0; i < this.nodeCount; ++i){
 			for(int j = 0; j < this.nodeCount; ++j){
 				if(i == j)
 					continue;
 				// random chance to skip this <j> node
-				if(r.nextInt(3) != 0)
+				if(this.rand.nextInt(3) != 0)
 					continue;
 
 				// make an adjacency between <i> and <j>, if the
@@ -124,15 +128,15 @@ public class GamePanel extends JPanel implements MouseListener, MouseMotionListe
 	// full shuffle, jumble up the nodes
 	private void shuffle(){
 		for(int i = 0; i < this.nodeCount; ++i){
-			this.node[i].getNode().x = (int)(Math.random() * (this.getWidth() - Node.SIZE));
-			this.node[i].getNode().y = (int)(Math.random() * (this.getHeight() - Node.SIZE));
+			this.node[i].getNode().x = this.rand.nextInt(this.getWidth() - Node.SIZE); //(int)(Math.random() * (this.getWidth() - Node.SIZE));
+			this.node[i].getNode().y = this.rand.nextInt(this.getHeight() - Node.SIZE); //(int)(Math.random() * (this.getHeight() - Node.SIZE));
 		}
 	}
 
 	// jumble up only on the y axis
 	private void shuffleY(){
 		for(int i = 0; i < this.nodeCount; ++i){
-			this.node[i].getNode().y = (int)(Math.random() * (this.getHeight() - Node.SIZE));
+			this.node[i].getNode().y = this.rand.nextInt(this.getHeight() - Node.SIZE); //(int)(Math.random() * (this.getHeight() - Node.SIZE));
 		}
 	}
 
