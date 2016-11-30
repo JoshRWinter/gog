@@ -198,12 +198,12 @@ public class GamePanel extends JPanel implements MouseListener, MouseMotionListe
 			a = ai.nextAdjacency();
 		}
 
+		g.setColor(new Color(0.6f, 0.0f, 0.6f));
 		// traverse over each node
 		for(int i = 0; i < this.nodeCount; ++i){
 			Node n = this.node[i].getNode();
 
 			// draw the node
-			g.setColor(new Color(0.6f, 0.0f, 0.6f));
 			g.fillOval(n.x, n.y, Node.SIZE, Node.SIZE);
 		}
 	}
