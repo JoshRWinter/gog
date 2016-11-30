@@ -112,31 +112,20 @@ public class GamePanel extends JPanel implements MouseListener, MouseMotionListe
 		this.allset(true,true);
 		// refresh the screen
 		this.repaint();
-
-		// a simple test
-		/*AdjacencyIterator ai = new AdjacencyIterator(this.node);
-		Adjacency a = null;
-		int count = 0;
-		do{
-			a = ai.nextAdjacency();
-			if(a != null) ++count;
-		}while(a != null);
-		this.adjacencyCount = count;
-		System.out.println(count + " adjacencies");*/
 	}
 
 	// full shuffle, jumble up the nodes
 	private void shuffle(){
 		for(int i = 0; i < this.nodeCount; ++i){
-			this.node[i].getNode().x = this.rand.nextInt(this.getWidth() - Node.SIZE); //(int)(Math.random() * (this.getWidth() - Node.SIZE));
-			this.node[i].getNode().y = this.rand.nextInt(this.getHeight() - Node.SIZE); //(int)(Math.random() * (this.getHeight() - Node.SIZE));
+			this.node[i].getNode().x = this.rand.nextInt(this.getWidth() - Node.SIZE);
+			this.node[i].getNode().y = this.rand.nextInt(this.getHeight() - Node.SIZE);
 		}
 	}
 
 	// jumble up only on the y axis
 	private void shuffleY(){
 		for(int i = 0; i < this.nodeCount; ++i){
-			this.node[i].getNode().y = this.rand.nextInt(this.getHeight() - Node.SIZE); //(int)(Math.random() * (this.getHeight() - Node.SIZE));
+			this.node[i].getNode().y = this.rand.nextInt(this.getHeight() - Node.SIZE);
 		}
 	}
 
