@@ -8,4 +8,3 @@ fi
 
 jar cfm gog.jar manifest *.class # jar it up
 
-java -jar gog.jar # run it
